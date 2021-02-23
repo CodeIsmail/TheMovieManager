@@ -28,15 +28,46 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func loginViaWebsiteTapped() {
-        performSegue(withIdentifier: "completeLogin", sender: nil)
+        TMDBClient.getRequestToken(){ isSuccess, error in
+            if isSuccess {
+                DispatchQueue.main.async {
+                    UIApplication.shared.open(TMDBClient.Endpoints.webAuth.url, options: [:], completionHandler: nil)
+                }
+                
+                //performSegue(withIdentifier: "completeLogin", sender: nil)
+            }
+        }
     }
     
     
     func handleResquesToken(isSuccess:Bool, error: Error?){
         
         if isSuccess {
-            print(TMDBClient.Auth.requestToken)
-            performSegue(withIdentifier: "completeLogin", sender: nil)
+            DispatchQueue.main.async {
+                let username = self.emailTextField.text!
+                let password = self.passwordTextField.text!
+                TMDBClient.getLoginRequest(username, password, completion: self.handleLoginResponse(isSuccess:error:))
+            }
+            
+        }else{
+            print("Something went wrong! \(String(describing: error))")
+        }
+    }
+    
+    func handleLoginResponse(isSuccess:Bool, error: Error?) {
+        if isSuccess {
+            TMDBClient.getSessionRequest(completion: self.handleSessionResponse(isSuccess:error:))
+        }else{
+            print("Failed to login! Check your email or password.")
+        }
+        
+    }
+    
+    func handleSessionResponse(isSuccess:Bool, error: Error?) {
+        if isSuccess {
+            DispatchQueue.main.async {
+                self.performSegue(withIdentifier: "completeLogin", sender: nil)
+            }
         }else{
             print("Something went wrong! \(String(describing: error))")
         }
