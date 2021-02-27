@@ -15,9 +15,7 @@ extension UIViewController {
             if isSuccess {
                 TMDBClient.Auth.requestToken = ""
                 TMDBClient.Auth.sessionId = ""
-                DispatchQueue.main.async {
-                    self.dismiss(animated: true, completion: nil)
-                }
+                self.dismiss(animated: true, completion: nil)
             }
         }
     }
